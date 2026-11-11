@@ -1,0 +1,572 @@
+CRM PROJECT DOCUMENTATION
+=========================
+
+Project Name
+------------
+CRM - Waterproofing / Service Business Management System
+
+Project Purpose
+---------------
+This project is a web-based CRM system built in Laravel. It is used to manage
+customers, quotations, invoices, payments, expenses, users, roles, permissions,
+settings, and activity logs in one admin panel.
+
+The main goal of the project is to help the company track the complete business
+flow:
+
+1. Add and manage customers.
+2. Create quotations / estimations for customers.
+3. Convert quotations into invoices.
+4. Record customer payments against invoices.
+5. Record business or project expenses.
+6. Check customer-wise payment and expense balance.
+7. Manage users and permissions.
+8. Keep activity logs for admin tracking.
+
+
+Technology Used
+---------------
+Backend: Laravel / PHP
+Frontend: Blade templates, Bootstrap, Bootstrap Icons, jQuery, SweetAlert
+Database: MySQL
+Server Environment: XAMPP local server
+
+
+Main Modules
+------------
+
+1. Authentication Module
+------------------------
+This module handles login, logout, forgot password, and reset password.
+Only authenticated users can access the admin panel.
+
+Important files:
+- routes/web.php
+- app/Http/Controllers/Auth/LoginController.php
+- app/Http/Controllers/Auth/ForgotPasswordController.php
+- resources/views/layouts/auth.blade.php
+
+
+2. Dashboard Module
+-------------------
+The dashboard is the first page after login. It gives users a quick overview of
+business data and navigation to other modules.
+
+Important files:
+- app/Http/Controllers/Admin/DashboardController.php
+- resources/views/admin/dashboard.blade.php
+
+
+3. User Management Module
+-------------------------
+This module is used to create, edit, view, deactivate, and delete admin users.
+It also supports profile updates, password changes, reset password, and force
+logout.
+
+Important files:
+- app/Http/Controllers/Admin/UserController.php
+- app/Models/User.php
+- resources/views/admin/users/
+
+
+4. Roles and Permissions Module
+-------------------------------
+This module controls what each user can access. For example, accountant users
+can access invoices, transactions, expenses, and reports, while sales users can
+access customer and quotation work.
+
+Default roles include:
+- Super Admin
+- Admin
+- Manager
+- Sales Executive
+- Accountant
+- Site Engineer
+
+Important files:
+- app/Http/Controllers/Admin/RoleController.php
+- app/Models/Role.php
+- app/Models/Permission.php
+- database/seeders/DatabaseSeeder.php
+- resources/views/admin/roles/
+
+
+5. Customer Module
+------------------
+This module stores customer details such as name, email, mobile, company name,
+GST number, address, source, type, status, notes, assigned user, and creator.
+
+Customer data is used by quotations, invoices, payments, expenses, and the new
+customer ledger.
+
+Important files:
+- app/Http/Controllers/Admin/CustomerController.php
+- app/Models/Customer.php
+- app/Services/CustomerService.php
+- resources/views/admin/customers/
+
+
+6. Service Module
+-----------------
+This module stores company services and service categories. These services are
+used while preparing quotations and invoices.
+
+Important files:
+- app/Http/Controllers/Admin/ServiceController.php
+- app/Http/Controllers/Admin/ServiceCategoryController.php
+- app/Models/Service.php
+- app/Models/ServiceCategory.php
+- resources/views/admin/services/
+- resources/views/admin/service-categories/
+
+
+7. Quotation / Estimation Module
+--------------------------------
+This module creates quotations for customers. It supports quotation items,
+pricing, terms, guarantee, payment terms, status updates, print/PDF, email, and
+conversion to invoice.
+
+Important files:
+- app/Http/Controllers/Admin/QuotationController.php
+- app/Models/Quotation.php
+- app/Models/QuotationItem.php
+- resources/views/admin/quotations/
+
+
+8. Invoice Module
+-----------------
+This module creates and manages invoices. Invoices can be created from
+quotations or directly. The invoice status changes based on payment collection.
+
+Invoice statuses include sent, partial, paid, cancelled, etc.
+
+Important files:
+- app/Http/Controllers/Admin/InvoiceController.php
+- app/Models/Invoice.php
+- app/Models/InvoiceItem.php
+- resources/views/admin/invoices/
+
+
+9. Payment / Transaction Module
+-------------------------------
+This module records customer payments. Payments are saved in the transactions
+table. Each payment belongs to a customer and invoice.
+
+Payment features:
+- Record payment
+- Edit payment
+- Delete payment
+- Change payment status
+- Generate payment receipt
+- Send payment receipt email
+- Track paid, pending, and outstanding invoice amount
+
+Important files:
+- app/Http/Controllers/Admin/TransactionController.php
+- app/Models/Transaction.php
+- resources/views/admin/transactions/
+
+
+10. Expense Module
+------------------
+This module records expenses. Expenses can be linked to a customer and invoice.
+It is useful for tracking project cost or business spending.
+
+Expense features:
+- Create expense
+- Edit expense
+- Delete expense
+- Change expense status
+- Filter by status, category, payment method, and date
+
+Important files:
+- app/Http/Controllers/Admin/ExpenseController.php
+- app/Models/Expense.php
+- resources/views/admin/expenses/
+
+
+11. Customer Ledger Module - Newly Added
+----------------------------------------
+This is the new module added for customer-wise combined payment and expense
+tracking.
+
+Before this change, payments and expenses were separate modules. The boss/user
+asked for a combined transaction module where we can see customer-wise:
+- How much payment was received
+- How much expense was spent
+- Net balance for each customer
+
+The Customer Ledger module solves this requirement.
+
+What the Customer Ledger Shows:
+- Total number of customers in the filtered result
+- Total payment received
+- Total expenses
+- Net balance
+- Customer-wise payment total
+- Customer-wise expense total
+- Customer-wise net balance
+- Number of payment entries per customer
+- Number of expense entries per customer
+
+Net Balance Formula:
+Payment Received - Expense Amount = Net Balance
+
+Example:
+If customer payment received is 100,000 and expense is 25,000:
+Net balance = 75,000
+
+If expense is more than payment, net balance will show as negative.
+
+Customer Ledger Filters:
+- Search by customer name, company, email, or mobile
+- Select one customer
+- Sort by net balance
+- Sort by payment amount
+- Sort by expense amount
+- Filter by date range
+- Include all customers option
+
+Customer Ledger Popup:
+When clicking the eye/view button in Customer Ledger, the selected customer's
+ledger opens in a popup. The popup shows:
+- Customer payment total
+- Customer expense total
+- Customer net balance
+- Latest combined payment and expense entries
+- Entry date
+- Entry type: Payment or Expense
+- Receipt/expense number
+- Linked invoice
+- Payment method
+- Amount
+
+The popup makes the page easier to use because the user can see details without
+leaving the customer ledger listing page.
+
+New URL:
+/admin/transactions/customer-ledger
+
+Permission Required:
+transactions.view
+
+
+12. Asset Management Module - Newly Added
+-----------------------------------------
+This module is used to manage company/godown assets and check whether stock is
+available or not.
+
+This is useful for a construction or waterproofing company where many daily
+workers use tools, machines, safety items, materials, and other assets from the
+godown.
+
+Main purpose:
+- Maintain all godown assets in one place
+- Check available stock quickly
+- Track issued quantity
+- Track returned quantity
+- Track damaged quantity
+- Track maintenance/repair quantity
+- Track lost quantity
+- See low stock and not available stock
+
+Asset examples:
+- Drill machine
+- Grinder
+- Safety belt
+- Helmet
+- Scaffolding material
+- Waterproofing machine
+- Pipe
+- Extension wire
+- Measuring tape
+- Trolley
+
+What the Assets Page Shows:
+- Total asset items
+- Total quantity
+- Available quantity
+- Issued quantity
+- Problem quantity
+- Asset code
+- Asset name
+- Category
+- Godown/location
+- Condition
+- Stock status
+- Quantity split: available, issued, damaged, maintenance, lost
+
+Stock Formula:
+Available Quantity =
+Total Quantity - Issued Quantity - Damaged Quantity - Maintenance Quantity - Lost Quantity
+
+Example:
+Total drill machines: 10
+Issued to workers: 4
+Damaged: 1
+Maintenance: 1
+Lost: 0
+Available in godown: 4
+
+Stock Status:
+- Available: stock is available in godown
+- Low Stock: available quantity is less than or equal to minimum alert quantity
+- Not Available: available quantity is zero
+- Inactive: asset is not currently used
+
+Asset Actions:
+- Add Asset
+- Edit Asset
+- Delete Asset
+- Issue to worker/site
+- Return to godown
+- Add stock
+- Mark damaged
+- Send to maintenance
+- Back from maintenance
+- Mark lost
+
+How to Use Asset Management:
+
+Step 1:
+Open Assets from the sidebar.
+
+Step 2:
+Add asset details such as name, category, unit, godown location, total quantity,
+minimum alert quantity, condition, and notes.
+
+Step 3:
+Check the asset list to see available stock.
+
+Step 4:
+Click the stock action button to issue, return, add stock, mark damaged, send to
+maintenance, or mark lost.
+
+Step 5:
+Enter quantity, date, worker name, site/project, reference, and notes if needed.
+
+Step 6:
+Save the stock action. The available quantity updates automatically.
+
+Why This Feature Is Useful:
+- One person can manage godown stock without confusion.
+- It avoids manually checking whether an item is available.
+- It keeps record of which stock is issued or unavailable.
+- It helps identify missing, damaged, or repair items.
+- It makes daily construction asset management faster.
+
+New URL:
+/admin/assets
+
+Permission Required:
+assets.view, assets.create, assets.edit, assets.delete
+
+Files Added/Changed for Asset Management:
+- app/Http/Controllers/Admin/AssetController.php
+- app/Models/AssetItem.php
+- app/Models/AssetMovement.php
+- database/migrations/2026_05_22_130000_create_asset_management_tables.php
+- resources/views/admin/assets/index.blade.php
+- routes/web.php
+- resources/views/layouts/app.blade.php
+- database/seeders/DatabaseSeeder.php
+
+
+Files Changed for Customer Ledger
+---------------------------------
+
+1. routes/web.php
+Added new route:
+GET /admin/transactions/customer-ledger
+Route name:
+admin.transactions.customer-ledger
+
+Purpose:
+This route opens the new customer-wise ledger page.
+
+
+2. app/Http/Controllers/Admin/TransactionController.php
+Added new method:
+customerLedger(Request $request)
+
+Purpose:
+This method calculates customer-wise payment totals, expense totals, net balance,
+filters, sorting, and selected customer ledger entries.
+
+Main calculations:
+- Cleared payment total from transactions table
+- Approved/paid expense total from expenses table
+- Net balance by subtracting expenses from payments
+
+
+3. resources/views/admin/transactions/customer-ledger.blade.php
+Added new Blade view file.
+
+Purpose:
+This file displays the Customer Ledger page.
+
+It contains:
+- Summary cards
+- Filter controls
+- Customer-wise ledger table
+- View popup modal for selected customer details
+- JavaScript for filters and modal display
+
+
+4. resources/views/admin/transactions/index.blade.php
+Added Customer Ledger tab/link on the Payments page.
+
+Purpose:
+Users can quickly go from Payments to Customer Ledger.
+
+
+5. resources/views/layouts/app.blade.php
+Added Customer Ledger link in the left sidebar.
+
+Purpose:
+Users can open Customer Ledger directly from the main navigation.
+
+
+How to Use Customer Ledger
+--------------------------
+
+Step 1:
+Login to the admin panel.
+
+Step 2:
+Open Customer Ledger from the sidebar.
+
+Step 3:
+View customer-wise totals:
+- Payments
+- Expenses
+- Net Balance
+
+Step 4:
+Use filters if required:
+- Search customer
+- Select customer
+- Select date range
+- Change sorting
+
+Step 5:
+Click the eye icon in the action column.
+
+Step 6:
+A popup opens and shows the selected customer's combined payment and expense
+ledger.
+
+Step 7:
+Click Close to return to the ledger list.
+
+
+Why This Feature Is Useful
+--------------------------
+
+1. It gives customer-wise financial clarity.
+2. It combines payment and expense information in one place.
+3. It helps management understand profit/balance per customer.
+4. It avoids checking Payments and Expenses pages separately.
+5. It gives accountants a fast customer account summary.
+6. It helps in project-wise or customer-wise decision making.
+
+
+Data Source
+-----------
+
+Payments:
+Data comes from the transactions table.
+Only cleared payments are counted in customer ledger totals.
+
+Expenses:
+Data comes from the expenses table.
+Only approved and paid expenses are counted in customer ledger totals.
+
+Customers:
+Data comes from the customers table.
+Each payment and expense is grouped by customer_id.
+
+
+Important Business Logic
+------------------------
+
+Payment counted when:
+- transaction type is payment
+- transaction direction is income
+- transaction status is cleared
+
+Expense counted when:
+- expense status is approved or paid
+
+Net balance:
+- Positive net means customer payments are higher than expenses.
+- Negative net means expenses are higher than customer payments.
+
+
+Existing Project Features
+-------------------------
+
+The project currently supports:
+- Login and authentication
+- Dashboard
+- User management
+- Role and permission management
+- Customer management
+- Service and service category management
+- Quotation management
+- Invoice management
+- Payment management
+- Payment receipt print
+- Payment receipt email
+- Expense management
+- Customer-wise ledger
+- Asset management / godown stock
+- Settings management
+- Activity logs
+- Login history
+
+
+Testing / Verification Done
+---------------------------
+
+The following checks were done after adding the Customer Ledger:
+
+1. PHP syntax check on changed files.
+2. Laravel route list check for transaction routes.
+3. Confirmed new route is registered.
+4. Confirmed Customer Ledger popup Blade file has no syntax errors.
+
+Commands used:
+- php -l app/Http/Controllers/Admin/TransactionController.php
+- php -l app/Http/Controllers/Admin/AssetController.php
+- php -l routes/web.php
+- php -l resources/views/admin/transactions/customer-ledger.blade.php
+- php -l resources/views/admin/assets/index.blade.php
+- php artisan route:list --name=transactions
+- php artisan route:list --name=assets
+
+
+Future Improvements
+-------------------
+
+Possible future improvements:
+- Export Customer Ledger to Excel or PDF
+- Add print option for customer ledger popup
+- Add invoice-wise profit report
+- Add project-wise expense summary
+- Add chart view for payments vs expenses
+- Add date presets such as Today, This Month, This Year
+- Export asset stock report to Excel or PDF
+- Add worker-wise asset issue report
+- Add asset barcode/QR code scanning
+
+
+Summary
+-------
+This CRM project is used to manage the complete company business workflow from
+customer creation to quotation, invoice, payment, expense, and financial
+tracking.
+
+The latest work added a Customer Ledger module. This module gives a combined
+customer-wise report of payments and expenses and shows detailed customer ledger
+entries in a popup when clicking the view button.
